@@ -37,15 +37,21 @@ function registrybrowser(packagepattern=""; registrypattern="")
             ipackage = pick_one("Select package (or 'q' to return):", vcat(packages, returnstr); pagesize)
             ipackage in [-1, length(packages) + 1] && break
             package = packages[ipackage]
-            while true
-                mode = pick_one("Select desired info (or 'q' to return):", modes)
-                mode in [-1, length(modes)] && break
-                joinpath(splitdir(registry.path)[1],
-                         registry.name,
-                         package[1:1] |> uppercase,
-                         package,
-                         modes[mode] * ".toml"
-                        ) |> less
+            mktemp() do path, io
+                for mode in modes[1:end-1]
+                    write(io, "#", "-"^77)
+                    write(io, "\n#    $(registry.name) - $package - $mode.toml\n")
+                    write(io, "#", "-"^77, "\n\n")
+                    joinpath(splitdir(registry.path)[1],
+                             registry.name,
+                             package[1:1] |> uppercase,
+                             package,
+                             mode * ".toml"
+                            ) |> read |> (x -> write(io, x))
+                    write(io, "\n")
+                end
+                flush(io)
+                less(path)
             end
         end
     end
