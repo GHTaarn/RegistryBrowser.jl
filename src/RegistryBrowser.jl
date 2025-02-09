@@ -13,12 +13,12 @@ pick_one(msg, options; kwargs...) = (println(msg); RadioMenu(options; kwargs...)
 
 function registrybrowser(packagepattern=""; registrypattern="")
     while true
-        rregistries = filter(x->contains(x.name, registrypattern), Pkg.Registry.reachable_registries())
-        registries = getfield.(rregistries, :name)
-        pagesize = min(length(registries) + 1, max(2, displaysize(stdout)[1] - 1))
-        iregistry = pick_one("Select registry (or 'q' to return):", vcat(registries, returnstr); pagesize)
-        iregistry in [-1, length(registries) + 1] && break
-        registry = rregistries[iregistry]
+        registries = filter(x->contains(x.name, registrypattern), Pkg.Registry.reachable_registries())
+        roptions = vcat(getfield.(registries, :name), returnstr)
+        pagesize = min(length(roptions), max(2, displaysize(stdout)[1] - 1))
+        iregistry = pick_one("Select registry (or 'q' to return):", roptions; pagesize)
+        iregistry in [-1, length(roptions)] && break
+        registry = registries[iregistry]
         while true
             packages = filter(contains(packagepattern), [p.name for p in values(registry.pkgs)]) |> sort
             pagesize = min(length(packages) + 1, max(2, displaysize(stdout)[1] - 1))
