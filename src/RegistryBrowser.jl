@@ -37,21 +37,32 @@ function registrybrowser(packagepattern=""; registrypattern="")
             ipackage = pick_one("Select package (or 'q' to return):", vcat(packages, returnstr); pagesize)
             ipackage in [-1, length(packages) + 1] && break
             package = packages[ipackage]
-            mktemp() do path, io
-                for sect in subsections
-                    write(io, "#", "-"^77)
-                    write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
-                    write(io, "#", "-"^77, "\n\n")
-                    joinpath(splitdir(registry.path)[1],
-                             registry.name,
-                             package[1:1] |> uppercase,
-                             package,
-                             sect * ".toml"
-                            ) |> read |> (x -> write(io, x))
-                    write(io, "\n")
+            dirpath = joinpath(splitdir(registry.path)[1],
+                               registry.name,
+                               package[1:1] |> uppercase,
+                               package)
+            if isdir(dirpath)
+                mktemp() do tmppath, io
+                    for sect in subsections
+                        write(io, "#", "-"^77)
+                        write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
+                        write(io, "#", "-"^77, "\n\n")
+                        joinpath(dirpath,
+                                 sect * ".toml"
+                                ) |> read |> (x -> write(io, x))
+                        write(io, "\n")
+                    end
+                    flush(io)
+                    less(tmppath)
                 end
-                flush(io)
-                less(path)
+            else
+                uuid = filter(pp->pp.name==package, [(; p.name, p.uuid) for p in values(registry.pkgs)])[1].uuid
+                println("\n#", "-"^55)
+                println("#    Registry: $(registry.name), Package: $package")
+                println("#", "-"^55, "\n")
+                println("name = \"$package\"")
+                println("uuid = \"$uuid\"\n\nPress return to continue")
+                readline()
             end
         end
     end
