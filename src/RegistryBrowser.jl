@@ -7,7 +7,7 @@ using REPL.TerminalMenus: request, RadioMenu
 import Pkg
 
 returnstr = "↶ Return"
-modes = ["Package", "Versions", "Deps", "Compat", returnstr]
+subsections = ["Package", "Versions", "Deps", "Compat"]
 
 pick_one(msg, options; kwargs...) = (println(msg); RadioMenu(options; kwargs...) |> request)
 
@@ -38,15 +38,15 @@ function registrybrowser(packagepattern=""; registrypattern="")
             ipackage in [-1, length(packages) + 1] && break
             package = packages[ipackage]
             mktemp() do path, io
-                for mode in modes[1:end-1]
+                for sect in subsections
                     write(io, "#", "-"^77)
-                    write(io, "\n#    $(registry.name) - $package - $mode.toml\n")
+                    write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
                     write(io, "#", "-"^77, "\n\n")
                     joinpath(splitdir(registry.path)[1],
                              registry.name,
                              package[1:1] |> uppercase,
                              package,
-                             mode * ".toml"
+                             sect * ".toml"
                             ) |> read |> (x -> write(io, x))
                     write(io, "\n")
                 end
