@@ -1,4 +1,4 @@
-# RegistryBrowser
+# RegistryBrowser.jl
 
 Interactively browse through [Julia](https://julialang.org) registries and
 the packages that they contain.
@@ -30,8 +30,8 @@ Packages will not be downloaded or installed.
 
 ## Feedback
 
-Please submit bug reports and feature requests to
-https://github.com/GHTaarn/RegistryBrowser.jl/issues
-or
-https://github.com/GHTaarn/RegistryBrowser.jl/pulls
+Please submit bug reports and enhancement/feature requests on the
+[issues page](https://github.com/GHTaarn/RegistryBrowser.jl/issues)
+or as
+[pull requests](https://github.com/GHTaarn/RegistryBrowser.jl/pulls).
 
