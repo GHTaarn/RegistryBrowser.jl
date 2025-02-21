@@ -4,7 +4,8 @@ export registrybrowser
 
 using InteractiveUtils: less
 using REPL.TerminalMenus: request, RadioMenu
-import Pkg
+using CodecZlib: GzipDecompressorStream
+import Pkg, TOML, Tar
 
 returnstr = "↶ Return"
 subsections = ["Package", "Versions", "Deps", "Compat"]
@@ -24,6 +25,7 @@ whose names match `registrypattern` will be shown. `packagepattern` and
 `registrypattern` can be of either `AbstractString` or `Regex` type.
 """
 function registrybrowser(packagepattern=""; registrypattern="")
+    tmpdir = Dict{String,String}()
     while true
         registries = filter(x->contains(x.name, registrypattern), Pkg.Registry.reachable_registries())
         if isempty(registries)
@@ -35,14 +37,23 @@ function registrybrowser(packagepattern=""; registrypattern="")
         iregistry = pick_one("Select registry (or 'q' to return):", roptions; pagesize)
         iregistry in [-1, length(roptions)] && break
         registry = registries[iregistry]
+        registrypath = if isdir(registry.path)
+            registry.path
+        else
+            if !haskey(tmpdir, registry.name)
+                toml = TOML.parsefile(registry.path)
+                tgzfile = joinpath(splitdir(registry.path)[1], toml["path"])
+                tmpdir[registry.name] = tgzfile |> open |> GzipDecompressorStream |> Tar.extract
+            end
+            tmpdir[registry.name]
+        end
         while true
             packages = filter(contains(packagepattern), [p.name for p in values(registry.pkgs)]) |> sort
             pagesize = min(length(packages) + 1, max(2, displaysize(stdout)[1] - 1))
             ipackage = pick_one("Select package (or 'q' to return):", vcat(packages, returnstr); pagesize)
             ipackage in [-1, length(packages) + 1] && break
             package = packages[ipackage]
-            dirpath = joinpath(splitdir(registry.path)[1],
-                               registry.name,
+            dirpath = joinpath(registrypath,
                                package[1:1] |> uppercase,
                                package)
             if isdir(dirpath)
