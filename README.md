@@ -28,6 +28,15 @@ Only relatively basic information about the packages can be displayed, this
 includes name, uuid, url, versions, dependencies and compatibility constraints.
 Packages will not be downloaded or installed.
 
+Also note that `registrybrowser` uses the locally cached registry information,
+so if this is not sufficiently up to date, then the cache should first be
+updated, e.g. with
+
+```julia
+using Pkg
+pkg"registry update"
+```
+
 ## Feedback
 
 Please submit bug reports and enhancement/feature requests on the
