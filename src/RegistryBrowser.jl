@@ -26,6 +26,10 @@ whose names match `registrypattern` will be shown. `packagepattern` and
 function registrybrowser(packagepattern=""; registrypattern="")
     while true
         registries = filter(x->contains(x.name, registrypattern), Pkg.Registry.reachable_registries())
+        if isempty(registries)
+            println("No matching registries found")
+            break
+        end
         roptions = vcat(getfield.(registries, :name), returnstr)
         pagesize = min(length(roptions), max(2, displaysize(stdout)[1] - 1))
         iregistry = pick_one("Select registry (or 'q' to return):", roptions; pagesize)
