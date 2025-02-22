@@ -43,7 +43,7 @@ function registrybrowser(packagepattern=""; registrypattern="")
             if !haskey(tmpdir, registry.name)
                 toml = TOML.parsefile(registry.path)
                 tgzfile = joinpath(splitdir(registry.path)[1], toml["path"])
-                tmpdir[registry.name] = tgzfile |> open |> GzipDecompressorStream |> Tar.extract
+                tmpdir[registry.name] = open(Tar.extract ∘ GzipDecompressorStream, tgzfile)
             end
             tmpdir[registry.name]
         end
@@ -81,6 +81,7 @@ function registrybrowser(packagepattern=""; registrypattern="")
             end
         end
     end
+    foreach(d->rm(d; recursive=true), values(tmpdir))
 end
 
 end # module RegistryBrowser
