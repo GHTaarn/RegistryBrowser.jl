@@ -1,7 +1,7 @@
 name = "RegistryBrowser"
 uuid = "64299e68-9b01-4b5a-be04-faf1e4464d2a"
 authors = ["GHTaarn <62629455+GHTaarn@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.2.0-DEV"
 
 [deps]
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
