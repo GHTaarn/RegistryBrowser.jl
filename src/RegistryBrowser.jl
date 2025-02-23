@@ -10,7 +10,17 @@ import Pkg, TOML, Tar
 returnstr = "↶ Return"
 subsections = ["Package", "Versions", "Deps", "Compat"]
 
-pick_one(msg, options; kwargs...) = (println(msg); RadioMenu(options; kwargs...) |> request)
+cursor = Dict{AbstractVector{<:AbstractString},Int64}()
+
+function pick_one(msg, options; kwargs...)
+    haskey(cursor, options) || (cursor[options] = 1)
+    println(msg)
+    isel = request(RadioMenu(options; kwargs...); cursor=cursor[options])
+    if 1 <= isel < length(options)
+        cursor[options] = isel
+    end
+    return isel
+end
 
 """
     registrybrowser(packagepattern=""; registrypattern="")
@@ -81,6 +91,7 @@ function registrybrowser(packagepattern=""; registrypattern="")
             end
         end
     end
+    empty!(cursor)
     foreach(d->rm(d; recursive=true), values(tmpdir))
 end
 
