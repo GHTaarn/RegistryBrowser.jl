@@ -9,7 +9,7 @@ Run the following code in the [Julia](https://julialang.org) REPL:
 
 ```julia
 using Pkg
-pkg"add https://github.com/GHTaarn/RegistryBrowser.jl"
+pkg"add RegistryBrowser"
 ```
 
 ## Use
