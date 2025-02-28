@@ -10,17 +10,6 @@ import Pkg, TOML, Tar
 returnstr = "↶ Return"
 subsections = ["Package", "Versions", "Deps", "Compat"]
 
-cursor = Dict{AbstractVector{<:AbstractString},Int64}()
-
-function pick_one(msg, options; kwargs...)
-    haskey(cursor, options) || (cursor[options] = 1)
-    println(msg)
-    isel = request(RadioMenu(options; kwargs...); cursor=cursor[options])
-    if 1 <= isel < length(options)
-        cursor[options] = isel
-    end
-    return isel
-end
 
 """
     registrybrowser(packagepattern=""; registrypattern="")
@@ -36,6 +25,18 @@ whose names match `registrypattern` will be shown. `packagepattern` and
 """
 function registrybrowser(packagepattern=""; registrypattern="")
     tmpdir = Dict{String,String}()
+    cursor = Dict{AbstractVector{<:AbstractString},Int64}()
+
+    pick_one(msg, options; kwargs...) = begin
+        haskey(cursor, options) || (cursor[options] = 1)
+        println(msg)
+        isel = request(RadioMenu(options; kwargs...); cursor=cursor[options])
+        if 1 <= isel < length(options)
+            cursor[options] = isel
+        end
+        return isel
+    end
+
     while true
         registries = filter(x->contains(x.name, registrypattern), Pkg.Registry.reachable_registries())
         if isempty(registries)
@@ -91,7 +92,6 @@ function registrybrowser(packagepattern=""; registrypattern="")
             end
         end
     end
-    empty!(cursor)
     foreach(d->rm(d; recursive=true), values(tmpdir))
 end
 
