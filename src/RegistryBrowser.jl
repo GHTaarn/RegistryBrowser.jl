@@ -27,14 +27,18 @@ function registrybrowser(packagepattern=""; registrypattern="")
     tmpdir = Dict{String,String}()
     cursor = Dict{AbstractVector{<:AbstractString},Int64}()
 
-    pick_one(msg, options; kwargs...) = begin
+    pick_one(msg, options) = begin
+        options = vcat(options, returnstr)
+        pagesize = min(length(options), max(2, displaysize(stdout)[1] - 1))
         haskey(cursor, options) || (cursor[options] = 1)
-        println(msg)
-        isel = request(RadioMenu(options; kwargs...); cursor=cursor[options])
+        println(msg, " (or 'q' to return):")
+        isel = request(RadioMenu(options; pagesize); cursor=cursor[options])
         if 1 <= isel < length(options)
             cursor[options] = isel
+            return isel
+        else
+            return -1
         end
-        return isel
     end
 
     while true
@@ -43,10 +47,9 @@ function registrybrowser(packagepattern=""; registrypattern="")
             println("No matching registries found")
             break
         end
-        roptions = vcat(getfield.(registries, :name), returnstr)
-        pagesize = min(length(roptions), max(2, displaysize(stdout)[1] - 1))
-        iregistry = pick_one("Select registry (or 'q' to return):", roptions; pagesize)
-        iregistry in [-1, length(roptions)] && break
+        roptions = getfield.(registries, :name)
+        iregistry = pick_one("Select registry", roptions)
+        iregistry == -1 && break
         registry = registries[iregistry]
         registrypath = if isdir(registry.path)
             registry.path
@@ -60,9 +63,8 @@ function registrybrowser(packagepattern=""; registrypattern="")
         end
         while true
             packages = filter(contains(packagepattern), [p.name for p in values(registry.pkgs)]) |> sort
-            pagesize = min(length(packages) + 1, max(2, displaysize(stdout)[1] - 1))
-            ipackage = pick_one("Select package (or 'q' to return):", vcat(packages, returnstr); pagesize)
-            ipackage in [-1, length(packages) + 1] && break
+            ipackage = pick_one("Select package", packages)
+            ipackage == -1 && break
             package = packages[ipackage]
             dirpath = joinpath(registrypath,
                                package[1:1] |> uppercase,
