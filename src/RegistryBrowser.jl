@@ -67,6 +67,7 @@ function registrybrowser(packagepattern=""; registrypattern="")
             ipackage == -1 && break
             package = packages[ipackage]
             dirpath = joinpath(registrypath,
+                               endswith(package, "_jll") ? "jll" : "",
                                package[1:1] |> uppercase,
                                package)
             if isdir(dirpath)
