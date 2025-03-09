@@ -65,37 +65,40 @@ function registrybrowser(packagepattern=""; registrypattern="")
             packages = filter(contains(packagepattern), [p.name for p in values(registry.pkgs)]) |> sort
             ipackage = pick_one("Select package", packages)
             ipackage == -1 && break
-            package = packages[ipackage]
-            dirpath = joinpath(registrypath,
-                               endswith(package, "_jll") ? "jll" : "",
-                               package[1:1] |> uppercase,
-                               package)
-            if isdir(dirpath)
-                mktemp() do tmppath, io
-                    for sect in subsections
-                        write(io, "#", "-"^77)
-                        write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
-                        write(io, "#", "-"^77, "\n\n")
-                        joinpath(dirpath,
-                                 sect * ".toml"
-                                ) |> read |> (x -> write(io, x))
-                        write(io, "\n")
-                    end
-                    flush(io)
-                    less(tmppath)
-                end
-            else
-                uuid = filter(pp->pp.name==package, [(; p.name, p.uuid) for p in values(registry.pkgs)])[1].uuid
-                println("\n#", "-"^55)
-                println("#    Registry: $(registry.name), Package: $package")
-                println("#", "-"^55, "\n")
-                println("name = \"$package\"")
-                println("uuid = \"$uuid\"\n\nPress return to continue")
-                readline()
-            end
+            displaypackage(registry, packages[ipackage]; registrypath)
         end
     end
     foreach(d->rm(d; recursive=true), values(tmpdir))
+end
+
+function displaypackage(registry, package; registrypath)
+    dirpath = joinpath(registrypath,
+                       endswith(package, "_jll") ? "jll" : "",
+                       package[1:1] |> uppercase,
+                       package)
+    if isdir(dirpath)
+        mktemp() do tmppath, io
+            for sect in subsections
+                write(io, "#", "-"^77)
+                write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
+                write(io, "#", "-"^77, "\n\n")
+                joinpath(dirpath,
+                         sect * ".toml"
+                        ) |> read |> (x -> write(io, x))
+                write(io, "\n")
+            end
+            flush(io)
+            less(tmppath)
+        end
+    else
+        uuid = filter(pp->pp.name==package, [(; p.name, p.uuid) for p in values(registry.pkgs)])[1].uuid
+        println("\n#", "-"^55)
+        println("#    Registry: $(registry.name), Package: $package")
+        println("#", "-"^55, "\n")
+        println("name = \"$package\"")
+        println("uuid = \"$uuid\"\n\nPress return to continue")
+        readline()
+    end
 end
 
 end # module RegistryBrowser
