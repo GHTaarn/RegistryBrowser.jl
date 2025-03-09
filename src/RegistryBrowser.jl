@@ -5,10 +5,11 @@ export registrybrowser
 using InteractiveUtils: less
 using REPL.TerminalMenus: request, RadioMenu
 using CodecZlib: GzipDecompressorStream
-import Pkg, TOML, Tar
+import Markdown, Pkg, TOML, Tar
 
 returnstr = "↶ Return"
 subsections = ["Package", "Versions", "Deps", "Compat"]
+pkgviewoptions = ["Locally cached information", "Last commit & README"]
 
 
 """
@@ -65,7 +66,16 @@ function registrybrowser(packagepattern=""; registrypattern="")
             packages = filter(contains(packagepattern), [p.name for p in values(registry.pkgs)]) |> sort
             ipackage = pick_one("Select package", packages)
             ipackage == -1 && break
-            displaypackage(registry, packages[ipackage]; registrypath)
+            while true
+                iaction = pick_one("Select what to display", pkgviewoptions)
+                if iaction == 1
+                    displaypackage(registry, packages[ipackage]; registrypath)
+                elseif iaction == 2
+                    displaypackageclone(registry, packages[ipackage]; registrypath)
+                else
+                    break
+                end
+            end
         end
     end
     foreach(d->rm(d; recursive=true), values(tmpdir))
@@ -99,6 +109,30 @@ function displaypackage(registry, package; registrypath)
         println("uuid = \"$uuid\"\n\nPress return to continue")
         readline()
     end
+end
+
+function displaypackageclone(registry, package; registrypath)
+    try
+        tompath = joinpath(registrypath,
+                           endswith(package, "_jll") ? "jll" : "",
+                           package[1:1] |> uppercase,
+                           package,
+                           "Package.toml"
+                          )
+        repo = TOML.parse(read(tompath, String))["repo"]
+        mktempdir() do tmppath
+            run(`git clone --sparse --depth 1 $repo $tmppath`)
+            println("Last commit on default branch:")
+            run(Cmd(`git log`; dir=tmppath))
+            println("Press return to view README.md")
+            readline()
+            read(joinpath(tmppath, "README.md"), String) |> Markdown.parse |> display
+        end
+    catch e1
+        println(e1)
+    end
+    print("Press return to continue")
+    readline()
 end
 
 end # module RegistryBrowser

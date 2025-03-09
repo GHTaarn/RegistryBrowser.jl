@@ -24,17 +24,25 @@ registrybrowser(r"^Linear"; registrypattern="General")
 ```
 
 Hereafter an intuitive interactive browser will be displayed in the terminal.
-Only relatively basic information about the packages can be displayed, this
-includes name, uuid, url, versions, dependencies and compatibility constraints.
-Packages will not be downloaded or installed.
 
-Also note that `registrybrowser` uses the locally cached registry information,
-so if this is not sufficiently up to date, then the cache should first be
-updated, e.g. with
+For each package one can choose to either display locally cached information
+(which includes name, uuid, url, versions, dependencies and compatibility
+constraints) or to fetch some key information from the online repository
+(the last entry in the commit log of the default branch and the `README.md`
+file of the default branch).
+
+The local cache can be updated with
 
 ```julia
 using Pkg
 pkg"registry update"
+```
+
+Viewing information from the online repository is only possible if `git`
+version 2.25 or higher is installed. This can be checked from the REPL with
+
+```julia
+run(`git --version`)
 ```
 
 ## Feedback
