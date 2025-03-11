@@ -3,6 +3,7 @@ module RegistryBrowser
 export registrybrowser
 
 using InteractiveUtils: less
+using TerminalPager: pager
 using REPL.TerminalMenus: request, RadioMenu
 using CodecZlib: GzipDecompressorStream
 import Markdown, Pkg, TOML, Tar
@@ -126,13 +127,13 @@ function displaypackageclone(registry, package; registrypath)
             run(Cmd(`git log`; dir=tmppath))
             println("Press return to view README.md")
             readline()
-            read(joinpath(tmppath, "README.md"), String) |> Markdown.parse |> display
+            read(joinpath(tmppath, "README.md"), String) |> Markdown.parse |> pager
         end
     catch e1
         println(e1)
+        print("Press return to continue")
+        readline()
     end
-    print("Press return to continue")
-    readline()
 end
 
 end # module RegistryBrowser
