@@ -7,9 +7,9 @@ using REPL.TerminalMenus: request, RadioMenu
 using CodecZlib: GzipDecompressorStream
 import Markdown, Pkg, TOML, Tar
 
-returnstr = "↶ Return"
-subsections = ["Package", "Versions", "Deps", "Compat"]
-pkgviewoptions = ["Locally cached information", "Last commit & README"]
+const returnstr = "↶ Return"
+const subsections = ["Package", "Versions", "Deps", "Compat"]
+const pkgviewoptions = ["Locally cached information", "Last commit & README"]
 
 
 """
