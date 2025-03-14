@@ -2,7 +2,6 @@ module RegistryBrowser
 
 export registrybrowser
 
-using InteractiveUtils: less
 using TerminalPager: pager
 using REPL.TerminalMenus: request, RadioMenu
 using CodecZlib: GzipDecompressorStream
@@ -87,29 +86,28 @@ function displaypackage(registry, package; registrypath)
                        endswith(package, "_jll") ? "jll" : "",
                        package[1:1] |> uppercase,
                        package)
+    io = IOBuffer()
     if isdir(dirpath)
-        mktemp() do tmppath, io
-            for sect in subsections
-                write(io, "#", "-"^77)
-                write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
-                write(io, "#", "-"^77, "\n\n")
-                joinpath(dirpath,
-                         sect * ".toml"
-                        ) |> read |> (x -> write(io, x))
-                write(io, "\n")
-            end
-            flush(io)
-            less(tmppath)
+        for sect in subsections
+            write(io, "#", "-"^77)
+            write(io, "\n#    $(registry.name) - $package - $sect.toml\n")
+            write(io, "#", "-"^77, "\n\n")
+            joinpath(dirpath,
+                     sect * ".toml"
+                    ) |> read |> (x -> write(io, x))
+            write(io, "\n")
         end
     else
         uuid = filter(pp->pp.name==package, [(; p.name, p.uuid) for p in values(registry.pkgs)])[1].uuid
-        println("\n#", "-"^55)
-        println("#    Registry: $(registry.name), Package: $package")
-        println("#", "-"^55, "\n")
-        println("name = \"$package\"")
-        println("uuid = \"$uuid\"\n\nPress return to continue")
-        readline()
+        println(io, "\n#", "-"^55)
+        println(io, "#    Registry: $(registry.name), Package: $package")
+        println(io, "#", "-"^55, "\n")
+        println(io, "name = \"$package\"")
+        println(io, "uuid = \"$uuid\"")
     end
+    flush(io)
+    seekstart(io)
+    read(io, String) |> pager
 end
 
 function displaypackageclone(registry, package; registrypath)
@@ -123,10 +121,18 @@ function displaypackageclone(registry, package; registrypath)
         repo = TOML.parse(read(tompath, String))["repo"]
         mktempdir() do tmppath
             run(`git clone --sparse --depth 1 $repo $tmppath`)
-            println("Last commit on default branch:")
-            run(Cmd(`git log`; dir=tmppath))
-            println("Press return to view README.md")
-            readline()
+            lastlog = let iolog = IOBuffer()
+                run(Cmd(`git log`; dir=tmppath), stdin, iolog, iolog)
+                flush(iolog)
+                seekstart(iolog)
+                read(iolog, String)
+            end
+            "(Last commit on default branch)\n" *
+            "```\n" *
+            replace(lastlog, "```" => "(3 backticks)") *
+            "\n```\n" *
+            "---\n" *
+            "(README.md from default branch)\n\n" *
             read(joinpath(tmppath, "README.md"), String) |> Markdown.parse |> pager
         end
     catch e1
