@@ -13,7 +13,7 @@ Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
 
 [compat]
-CodecZlib = "0.7.8"
+CodecZlib = "0.4 - 0.7"
 Markdown = "1.7"
 Pkg = "1.7 - 1.11"
 REPL = "1.7"
