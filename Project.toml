@@ -15,7 +15,7 @@ TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
 [compat]
 CodecZlib = "0.4 - 0.7"
 Markdown = "1.7"
-Pkg = "1.7 - 1.11"
+Pkg = "1.7 - 1.13"
 REPL = "1.7"
 TOML = "1"
 Tar = "1.10"
