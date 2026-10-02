@@ -137,9 +137,12 @@ function displaypackageclone(registry, package; registrypath)
             "```\n" *
             replace(lastlog, "```" => "(3 backticks)") *
             "\n```\n" *
-            "---\n" *
-            "(README.md from default branch)\n\n" *
-            read(joinpath(tmppath, "README.md"), String) |> Markdown.parse |> pager
+            "---\n" * try
+                "(README.md from default branch)\n\n" *
+                read(joinpath(tmppath, "README.md"), String)
+            catch e2
+                "(Failed to retrieve README.md from default branch)\n\n$e2"
+            end |> Markdown.parse |> pager
         end
     catch e1
         println(e1)
