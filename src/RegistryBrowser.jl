@@ -5,6 +5,7 @@ export registrybrowser
 using TerminalPager: pager
 using REPL.TerminalMenus: request, RadioMenu
 using CodecZlib: GzipDecompressorStream
+using CodecZstd: ZstdDecompressorStream
 import Markdown, Pkg, TOML, Tar
 
 const returnstr = "↶ Return"
@@ -57,8 +58,13 @@ function registrybrowser(packagepattern=""; registrypattern="")
         else
             if !haskey(tmpdir, registry.name)
                 toml = TOML.parsefile(registry.path)
-                tgzfile = joinpath(splitdir(registry.path)[1], toml["path"])
-                tmpdir[registry.name] = open(Tar.extract ∘ GzipDecompressorStream, tgzfile)
+                compressedtar = joinpath(splitdir(registry.path)[1], toml["path"])
+                decompressor = if endswith(compressedtar, ".zst")
+                    ZstdDecompressorStream
+                else
+                    GzipDecompressorStream
+                end
+                tmpdir[registry.name] = open(Tar.extract ∘ decompressor, compressedtar)
             end
             tmpdir[registry.name]
         end

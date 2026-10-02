@@ -5,6 +5,7 @@ version = "0.3.0-DEV"
 
 [deps]
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
+CodecZstd = "6b39b394-51ab-5f42-8807-6242bab2b4c2"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -14,6 +15,7 @@ TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
 
 [compat]
 CodecZlib = "0.4 - 0.7"
+CodecZstd = "0.7 - 0.8"
 Markdown = "1.7"
 Pkg = "1.7 - 1.13"
 REPL = "1.7"
